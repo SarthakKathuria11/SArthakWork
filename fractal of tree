@@ -1,0 +1,117 @@
+#include <GL/glut.h>
+#include <string>
+#include <math.h>
+
+
+using namespace std;
+
+
+const float PI = 3.1415926536f;
+
+
+
+
+class vector2
+{
+public:
+    vector2() { x = y = 0; }
+    vector2( int a, int b ) { x = a; y = b; }
+    void set( int a, int b ) { x = a; y = b; }
+    void rotate( float angle_r )
+    {
+	float _x = static_cast<float>( x ),
+	      _y = static_cast<float>( y ),
+	       s = sinf( angle_r ),
+	       c = cosf( angle_r ),
+	       a = _x * c - _y * s,
+	       b = _x * s + _y * c;
+
+	x = static_cast<int>( a );
+	y = static_cast<int>( b );
+    }
+
+    int x, y;
+};
+class fractalTree
+{
+public:
+    fractalTree()		      { _ang = DegToRadian( 24.0f ); }
+    float DegToRadian( float degree ) { return degree * ( PI / 180.0f ); }
+
+    void create(  		)
+    {
+
+	float line_len = 130.0f;
+
+	vector2 sp( 640/2,512-1);
+
+	glBegin(GL_LINES);
+	glVertex2f(sp.x,sp.y);
+	sp.y-=static_cast<int>( line_len );
+	glVertex2f(sp.x,sp.y);
+	glEnd();
+
+	drawRL( &sp, line_len, 0, true );
+	drawRL( &sp, line_len, 0, false );
+    }
+
+private:
+    void drawRL( vector2* sp, float line_len, float a, bool rg )
+    {
+	line_len *= .75f;
+	if( line_len < 2.0f ) return;
+
+	glBegin(GL_LINES);
+		glVertex2f(sp->x,sp->y);
+		vector2 r( 0, static_cast<int>( line_len ) );
+
+		        if( rg ) a -= _ang;
+		        else a += _ang;
+
+			r.rotate( a );
+			r.x += sp->x; r.y = sp->y - r.y;
+
+		glVertex2f(r.x,r.y);
+		glEnd();
+	drawRL( &r, line_len, a, true );
+	drawRL( &r, line_len, a, false );
+    }
+
+
+    float     _ang;
+};
+fractalTree tree;
+void display()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	tree.create();
+	glFlush();
+	glutSwapBuffers();
+}
+void myinit()
+{
+	glClearColor(1.0,1.0,1.0,1.0);
+
+	glPointSize(1.0);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(0.0,640.0,0.0,512.0);
+	glColor3f(1,0,0);
+}
+
+int main( int argc, char* argv[] )
+{
+
+	glutInit(&argc,argv);
+		glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGB);
+	glutInitWindowSize(640,512);
+		glutInitWindowPosition(0,0);
+		glutCreateWindow("Fractal Tree");
+		glutDisplayFunc(display);
+
+		myinit();
+		glutMainLoop();
+
+    return 0;
+}

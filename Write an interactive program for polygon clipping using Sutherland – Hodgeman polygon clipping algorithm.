@@ -1,0 +1,269 @@
+#include <GL/glut.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
+#include<stdio.h>
+#include<stdlib.h>
+//#include<math.h>
+
+void clip(float,float,float);
+
+int i,j=0,n;
+int rx1,rx2,ry1,ry2;
+float x1[15]={0},y1[15]={0};
+float x[15]={0};
+float y[15]={0};
+float m;
+static int co=0;
+static struct Point
+{
+float px1;
+float py1;
+float px2;
+float py2;
+}p;
+static int counter=0;
+static int counter1=0;
+
+void foo(){
+
+counter=0;
+	counter1=0;	
+	counter=0;
+	p.px1=0;
+	p.py1=0;
+	p.px2=0;
+	p.py2=0;
+	co=0;
+
+}
+
+void rectangle(float a, float b, float c, float d)
+{
+	glColor3f(1,1,1);
+	glBegin(GL_LINE_LOOP);  
+	glVertex2f(a,b);
+	glVertex2f(a,d);  
+	glVertex2f(c,d); 
+	glVertex2f(c,b);     
+   	glEnd();
+	glutPostRedisplay();
+	glFlush();
+	
+	
+}
+
+void line(float a, float b, float c, float d)
+{
+	
+	glBegin(GL_LINES);  
+	glVertex2f(a,b);
+	glVertex2f(c,d);      
+   	glEnd();
+	glutPostRedisplay();
+	glFlush();
+	
+	
+}
+
+void wa()
+{
+	//int gd=DETECT,gm;
+
+	
+	int i,n;
+	
+	//clrscr();
+	
+	//initgraph(&gd,&gm,"");
+
+	/*printf("coordinates for rectangle : ");
+	scanf("%d%d%d%d",&rx1,&ry1,&rx2,&ry2);
+	printf("no. of sides for polygon : ");
+	scanf("%d",&n);
+	printf("coordinates : ");*/
+	n=counter1;
+	/*for(i=0;i<n;i++)
+	{
+		scanf("%f%f",&x[i],&y[i]);
+	}
+	cleardevice();
+	outtextxy(10,10,"Before clipping");
+	outtextxy(10,470,"Press any key....");*/
+	
+
+	rectangle(rx1,ry1,rx2,ry2);
+	for(i=0;i<n-1;i++)
+	{
+	line(x[i],y[i],x[i+1],y[i+1]);
+	}
+	line(x[i],y[i],x[0],y[0]);
+	//getch();
+	//cleardevice();
+	for(i=0;i<n-1;i++)
+	{
+		m=(y[i+1]-y[i])/(x[i+1]-x[i]);
+		clip(x[i],y[i],m);
+		clip(x[i+1],y[i+1],m);
+		
+	}
+	m=(y[i]-y[0])/(x[i]-x[0]);
+	clip(x[i],y[i],m);
+	clip(x[0],y[0],m);
+		//outtextxy(10,10,"After clipping");
+		//outtextxy(10,470,"Press any key....");
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glColor3f(0,1,0);
+	rectangle(rx1,ry1,rx2,ry2);
+	for(i=0;i<j-1;i++)
+{
+		glColor3f(0,1,0);
+		line(x1[i],y1[i],x1[i+1],y1[i+1]);
+}
+	line(x1[i],y1[i],x1[0],y1[0]);
+	//getch();
+	}
+
+void clip(float e,float f,float m)
+	{
+		co++;
+		//printf("%d",x[n]);
+		if(x[0]<rx1 && x[n]<rx1 && co==n)
+		{
+		e=e;
+		f=f;
+		}
+		else{while((e<rx1 || e>rx2) ||( f<ry1 || f>ry2))
+		{
+			if(e<rx1)
+			{
+				f+=m*(rx1-e);
+				e=rx1;
+			}
+			else if(e>rx2)
+			{
+				f+=m*(rx2-e);
+				e=rx2;
+			}
+			if(f<ry1)
+			{
+				e+=(ry1-f)/m;
+				f=ry1;
+			}
+			else if(f>ry2)
+			{
+				e+=(ry2-f)/m;
+				f=ry2;
+			}
+			
+		}
+	x1[j]=e;
+	y1[j]=f;
+	j++;
+	}
+	}
+
+void drawPolygon(int button, int state, int x0, int y0)
+{
+
+   	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && counter==0) {
+        rx1 = x0-250;
+        ry1 = 250-y0;             
+ 	counter++;
+	}
+	else if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && counter==1) {
+        rx2 = x0-250;
+        ry2 = 250-y0;             
+ 	counter++;
+	rectangle(rx1,ry1,rx2,ry2);
+	}
+	else if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && counter1==0 ) {
+	      
+	x[counter1] = x0-250;
+        y[counter1] = 250-y0;   
+       	p.px1=x0-250;
+	p.py1=250-y0;
+ 	counter++;
+	counter1++;
+	
+	}
+	else if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && counter>1 && counter1!=0) {
+        x[counter1] = x0-250;
+        y[counter1] = 250-y0; 
+	
+        p.px2=x0-250;
+	p.py2=250-y0;  
+ 	counter++;
+	counter1++;
+	glColor3f(1,0,0);
+	line(p.px1,p.py1,p.px2,p.py2);
+	p.px1=p.px2;
+	p.py1=p.py2; 
+	
+	}
+     else if(button == GLUT_RIGHT_BUTTON && state== GLUT_DOWN && counter>1 )
+     {
+        /*glClear(GL_COLOR_BUFFER_BIT);
+        glutPostRedisplay();
+	pt1=0;
+	p.counter=0;
+	p.counter1=0;*/
+	glColor3f(1,0,0);
+	line(x[counter1-1],y[counter1-1],x[0],y[0]);
+	counter=0;
+    }
+
+	
+
+}
+
+
+void keyPressed(unsigned char key,int x0, int y0){
+
+if(key=='c'){
+	glClear(GL_COLOR_BUFFER_BIT);
+        glutPostRedisplay();
+	glFlush();
+	foo();
+	x[15]={0};
+	y[15]={0};
+	i=0;
+	j=0;
+	n=0;
+	x1[15]={0};
+	y1[15]={0};
+	m=0;
+
+}
+
+if(key=='p'){
+	wa();	
+}
+}
+
+void init() 
+{
+	glClearColor(0, 0, 0,0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(-250, 250, -250,250);
+}
+
+
+int main(int argc, char **argv)
+{
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitWindowPosition(30, 50);
+	glutInitWindowSize(500, 500);	
+	glutCreateWindow("First OpenGL Program");
+	init();
+	glutKeyboardFunc(keyPressed);
+	glutMouseFunc(drawPolygon);
+	glutKeyboardFunc(keyPressed);
+	
+	//glutDisplayFunc(wa);
+	glutMainLoop();
+	return 0;
+}

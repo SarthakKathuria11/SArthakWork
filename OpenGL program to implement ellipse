@@ -1,0 +1,192 @@
+#include<GL/glut.h>
+#include<stdio.h>
+#include<math.h>
+
+ static float x,y,rx,ry,Xc,Yc;
+ static float pk;
+ int counter=0;
+ static float xr=0,yr=0,x2,y2,x3,y3;
+ static float a,b;
+
+
+void init(void)
+{
+ glClearColor(0.0,0.0,0.0,0.0);
+ glMatrixMode(GL_PROJECTION);
+ gluOrtho2D(0.0, 640.0, 0.0,480.0);
+}
+
+void plot (int x, int y)
+{
+        glBegin (GL_POINTS);
+         glVertex2i (x, y);
+        glEnd ();
+	glFlush ();
+}
+ void elipsecreate(float a, float b){
+
+ rx=a;
+ ry=b;
+ Xc=xr;
+ Yc=yr;
+ x=0,y=ry;
+ float Rx=pow(rx,2),Ry=pow(ry,2);
+ pk=Ry-(Rx*ry)+(Rx/4);
+while((2*Ry*x)<=(2*Rx*y))
+{
+
+
+   if(pk<0)
+    {
+        x=x+1;
+        pk=pk+(2*Ry*x)+Ry;
+    }
+    else
+    {
+        x=x+1;
+        y=y-1;
+        pk=pk+(2*Ry*x)-(2*Rx*y)+Ry;
+    }
+glColor3f(0.0, 0.0, 1.0);
+    plot(x+Xc,y+Yc);
+    plot(-x+Xc,y+Yc);
+    plot(x+Xc,-y+Yc);
+    plot(-x+Xc,-y+Yc);
+ }
+ pk=(Ry*pow((x+0.5),2))+(Rx*pow((y-1),2))-(Rx*Ry);
+ while((2*Rx*y)!=0)
+ {
+
+    if(pk<0)
+    {
+        x=x+1;
+        y=y-1;
+        pk=pk-(2*Rx*y)+(2*Ry*x)+Rx;
+    }
+    else
+    {
+        y=y-1;
+        pk=pk-(2*Rx*y)+Rx;
+    }
+glColor3f(0.0,0.0, 1.0);
+    plot(x+Xc,y+Yc);
+    plot(-x+Xc,y+Yc);
+    plot(x+Xc,-y+Yc);
+    plot(-x+Xc,-y+Yc);
+
+}
+}
+
+void mouseclick(int button, int state, int xm, int ym)
+{
+
+    if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && counter == 0) {
+        xr = xm;
+        yr = 480-ym; 
+	glColor3f(1.0,1.0,0.0);
+	plot(xr,yr);
+	glPushAttrib(GL_ENABLE_BIT); 
+	// glPushAttrib is done to return everything to normal after drawing
+	glColor3f(1.0,1.0,1.0);
+	glLineStipple(1, 0x00AA);
+	glEnable(GL_LINE_STIPPLE);
+	glBegin(GL_LINES);
+	glVertex2f(xr-200,yr);
+	glVertex2f(xr+200,yr);
+	glVertex2f(xr,yr-200);
+	glVertex2f(xr,yr+200);
+	glEnd();
+	glFlush();
+
+glPopAttrib();
+
+	//printf("%f %f \n",xr,yr);             
+        counter++;
+    }
+ 
+    else if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && counter ==1) {
+        x2 = xm;
+        y2 = 480-ym;
+	a=abs(x2-xr);
+	glColor3f(1.0,0.0,0.0);
+	glBegin(GL_LINES);
+	glVertex2f(xr,yr);
+	glVertex2f(x2,yr);
+	glEnd();
+	glFlush();
+		
+	glColor3f(1.0,1.0,0.0);
+	plot(x2,yr);
+        counter++;
+        //midPointCircleAlgo();
+        //makeline((int)p.x1,(int)p.yr,(int)p.x2,(int)p.y2);
+    }
+	
+     else if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN && counter ==2) {
+        x3 = xm;
+        y3 = 480-ym;
+	b=abs(y3-yr);
+	glColor3f(1.0,0.0,0.0);
+	glBegin(GL_LINES);
+	glVertex2f(xr,yr);
+	glVertex2f(xr,y3);
+	glEnd();
+	glFlush();
+	glColor3f(1.0,1.0,0.0);
+	plot(xr,y3);
+	elipsecreate(a,b);
+        counter++;
+        //midPointCircleAlgo();
+        //makeline((int)p.x1,(int)p.yr,(int)p.x2,(int)p.y2);
+    }
+
+     if(button == GLUT_RIGHT_BUTTON && state== GLUT_DOWN)
+     {  
+	x=0;
+	y=0;
+	rx=0;
+	ry=0;	
+	Xc=0;
+	Yc=0;
+	pk=0;
+	counter=0;
+	xr=0;yr=0;x2=0;y2=0;x3=0;y3=0;
+	a=0;b=0;
+        glClear(GL_COLOR_BUFFER_BIT);
+        glutPostRedisplay();
+    }
+}
+
+
+void display(void)
+{
+ glColor3f(1.0,1.0,1.0);
+ glClear(GL_COLOR_BUFFER_BIT);
+ glBegin(GL_LINES);
+    glVertex2f(320.0,480.0);
+    glVertex2f(320.0,0.0);
+    glVertex2f(0.0,240.0);
+    glVertex2f(640.0,240.0);
+    glEnd();
+ //elipsecreate(50.0,30.0);
+    glFlush ();
+}
+
+
+int main(int argc, char** argv)
+{
+ glutInit(&argc,argv);
+ glutInitDisplayMode(GLUT_SINGLE|GLUT_RGB);
+ glutInitWindowPosition(50,50);
+ glutInitWindowSize(640,480);
+ glutCreateWindow("Elipse");
+ 
+ init();
+ glutDisplayFunc(display);
+ glutMouseFunc(mouseclick);
+ 
+
+ glutMainLoop();
+ return 0;
+}
+
